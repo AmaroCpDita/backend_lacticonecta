@@ -83,7 +83,7 @@ model PostVote {
   user      User     @relation(fields: [userId], references: [id])
   
   postId    Int
-  post      Post     @relation(fields: [postId], references: [id])
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   
   @@unique([userId, postId])
 }
@@ -98,7 +98,7 @@ model Comment {
   author    User     @relation(fields: [authorId], references: [id])
   
   postId    Int
-  post      Post     @relation(fields: [postId], references: [id])
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
 }
 
 model Review {
@@ -155,7 +155,7 @@ model Notification {
   actor     User?    @relation("NotificationActor", fields: [actorId], references: [id])
 
   postId    Int?
-  post      Post?    @relation(fields: [postId], references: [id])
+  post      Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   salaId    Int?
   sala      Sala?    @relation(fields: [salaId], references: [id])
