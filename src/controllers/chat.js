@@ -12,7 +12,7 @@ const chatWithAI = async (req, res) => {
     }
 
     // Prepare model
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
 
     // Format history for Gemini API
     // Gemini strictly requires the first message to be from 'user' and roles to alternate.
