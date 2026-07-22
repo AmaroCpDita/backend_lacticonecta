@@ -186,11 +186,65 @@ const getSavedSalas = async (req, res) => {
   }
 };
 
+const getFollowers = async (req, res) => {
+  try {
+    const userId = parseInt(req.params.id);
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        followers: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+            verified: true,
+            points: true
+          }
+        }
+      }
+    });
+
+    if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+    res.json(user.followers);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al obtener seguidores' });
+  }
+};
+
+const getFollowing = async (req, res) => {
+  try {
+    const userId = parseInt(req.params.id);
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        following: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+            verified: true,
+            points: true
+          }
+        }
+      }
+    });
+
+    if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+    res.json(user.following);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al obtener usuarios seguidos' });
+  }
+};
+
 module.exports = {
   updateProfile,
   getProfile,
   getPublicProfile,
   followUser,
   searchUsers,
-  getSavedSalas
+  getSavedSalas,
+  getFollowers,
+  getFollowing
 };

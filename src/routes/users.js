@@ -15,5 +15,7 @@ router.get('/saved-salas', verifyToken, usersController.getSavedSalas);
 router.get('/search', verifyToken, usersController.searchUsers);
 router.get('/profile/:id', verifyToken, usersController.getPublicProfile);
 router.post('/:id/follow', verifyToken, usersController.followUser);
+router.get('/:id/followers', verifyToken, usersController.getFollowers);
+router.get('/:id/following', verifyToken, usersController.getFollowing);
 
 module.exports = router;
