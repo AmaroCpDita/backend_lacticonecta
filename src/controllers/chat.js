@@ -15,7 +15,13 @@ const chatWithAI = async (req, res) => {
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     // Format history for Gemini API
-    const formattedHistory = history.map(msg => ({
+    // Gemini strictly requires the first message to be from 'user' and roles to alternate.
+    let validHistory = [...history];
+    if (validHistory.length > 0 && validHistory[0].sender === 'ai') {
+      validHistory.shift(); // Remove the hardcoded initial greeting
+    }
+
+    const formattedHistory = validHistory.map(msg => ({
       role: msg.sender === 'user' ? 'user' : 'model',
       parts: [{ text: msg.text }]
     }));
