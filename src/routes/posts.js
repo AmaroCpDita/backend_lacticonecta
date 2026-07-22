@@ -5,7 +5,7 @@ const { verifyToken } = require('../middlewares/auth');
 
 router.get('/', verifyToken, postsController.getPosts);
 router.post('/', verifyToken, postsController.createPost);
-router.post('/:id/like', verifyToken, postsController.likePost);
+router.post('/:id/vote', verifyToken, postsController.votePost);
 router.post('/:id/comments', verifyToken, postsController.addComment);
 router.post('/:id/comments/:commentId/like', verifyToken, postsController.likeComment);
 

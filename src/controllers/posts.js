@@ -11,7 +11,8 @@ const getPosts = async (req, res) => {
             author: { select: { id: true, name: true, avatar: true, verified: true, points: true } }
           },
           orderBy: { createdAt: 'asc' }
-        }
+        },
+        votes: true
       },
       orderBy: { createdAt: 'desc' }
     });
@@ -44,25 +45,64 @@ const createPost = async (req, res) => {
   }
 };
 
-const likePost = async (req, res) => {
+const votePost = async (req, res) => {
   try {
     const postId = parseInt(req.params.id);
-    const post = await prisma.post.update({
-      where: { id: postId },
-      data: { likes: { increment: 1 } },
-      include: { author: true }
-    });
-    
-    // Opcional: darle puntos al autor del post por el like recibido
-    await prisma.user.update({
-      where: { id: post.authorId },
-      data: { points: { increment: 1 } }
+    const { value } = req.body; // 1 (upvote) or -1 (downvote)
+    const userId = req.userId;
+
+    if (value !== 1 && value !== -1) {
+      return res.status(400).json({ error: 'Valor inválido' });
+    }
+
+    const existingVote = await prisma.postVote.findUnique({
+      where: { userId_postId: { userId, postId } }
     });
 
-    res.json({ message: 'Like registrado', likes: post.likes });
+    let likesChange = 0;
+
+    if (existingVote) {
+      if (existingVote.value === value) {
+        // Toggle off
+        await prisma.postVote.delete({ where: { id: existingVote.id } });
+        likesChange = -value;
+      } else {
+        // Change vote
+        await prisma.postVote.update({
+          where: { id: existingVote.id },
+          data: { value }
+        });
+        likesChange = value * 2;
+      }
+    } else {
+      // New vote
+      await prisma.postVote.create({ data: { value, userId, postId } });
+      likesChange = value;
+    }
+
+    const updatedPost = await prisma.post.update({
+      where: { id: postId },
+      data: { likes: { increment: likesChange } },
+      include: { author: true }
+    });
+
+    // Gamification
+    if (likesChange > 0) {
+      await prisma.user.update({
+        where: { id: updatedPost.authorId },
+        data: { points: { increment: likesChange } }
+      });
+    } else if (likesChange < 0) {
+      await prisma.user.update({
+        where: { id: updatedPost.authorId },
+        data: { points: { decrement: Math.abs(likesChange) } }
+      });
+    }
+
+    res.json({ message: 'Voto registrado', likes: updatedPost.likes });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Error al dar like' });
+    res.status(500).json({ error: 'Error al votar' });
   }
 };
 
@@ -114,7 +154,7 @@ const likeComment = async (req, res) => {
 module.exports = {
   getPosts,
   createPost,
-  likePost,
+  votePost,
   addComment,
   likeComment
 };

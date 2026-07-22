@@ -3,10 +3,11 @@ const prisma = new PrismaClient();
 
 const updateProfile = async (req, res) => {
   try {
-    const { name } = req.body;
+    const { name, bio } = req.body;
     let updateData = {};
     
     if (name) updateData.name = name;
+    if (bio !== undefined) updateData.bio = bio;
     
     if (req.file) {
       // Devolver una ruta relativa que funcione en cualquier entorno
@@ -42,6 +43,7 @@ const getPublicProfile = async (req, res) => {
         id: true,
         name: true,
         avatar: true,
+        bio: true,
         verified: true,
         points: true,
         createdAt: true,
@@ -112,6 +114,7 @@ const getProfile = async (req, res) => {
         name: true,
         email: true,
         avatar: true,
+        bio: true,
         verified: true,
         points: true,
         createdAt: true,

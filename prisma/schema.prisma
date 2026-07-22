@@ -16,6 +16,7 @@ model User {
   email     String   @unique
   password  String
   avatar    String?
+  bio       String?
   role      String   @default("user") // "user" or "admin"
   verified  Boolean  @default(false)
   createdAt DateTime @default(now())
@@ -23,6 +24,7 @@ model User {
   posts       Post[]
   comments    Comment[]
   reviews     Review[]
+  postVotes   PostVote[]
   appointments Appointment[] @relation("UserAppointments")
   
   points      Int       @default(0)
@@ -59,6 +61,21 @@ model Post {
   authorId  Int
   author    User     @relation(fields: [authorId], references: [id])
   comments  Comment[]
+  votes     PostVote[]
+}
+
+model PostVote {
+  id        Int      @id @default(autoincrement())
+  value     Int      // 1 or -1
+  createdAt DateTime @default(now())
+  
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  
+  postId    Int
+  post      Post     @relation(fields: [postId], references: [id])
+  
+  @@unique([userId, postId])
 }
 
 model Comment {
