@@ -89,11 +89,4 @@ async function main() {
   console.log('Seed check complete.');
 }
 
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+module.exports = main;
