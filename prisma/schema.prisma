@@ -1,0 +1,98 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  avatar    String?
+  role      String   @default("user") // "user" or "admin"
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  
+  posts       Post[]
+  comments    Comment[]
+  reviews     Review[]
+  appointments Appointment[] @relation("UserAppointments")
+}
+
+model Sala {
+  id          Int      @id @default(autoincrement())
+  name        String
+  address     String
+  lat         Float
+  lng         Float
+  rating      Float    @default(0.0)
+  reviews     Int      @default(0)
+  description String
+  image       String?
+  services    String   // JSON stringified array of services
+  approved    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  salaReviews Review[]
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  tag       String
+  likes     Int      @default(0)
+  createdAt DateTime @default(now())
+  
+  authorId  Int
+  author    User     @relation(fields: [authorId], references: [id])
+  comments  Comment[]
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+  
+  authorId  Int
+  author    User     @relation(fields: [authorId], references: [id])
+  
+  postId    Int
+  post      Post     @relation(fields: [postId], references: [id])
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  rating    Int
+  content   String?
+  createdAt DateTime @default(now())
+  
+  authorId  Int
+  author    User     @relation(fields: [authorId], references: [id])
+  
+  salaId    Int
+  sala      Sala     @relation(fields: [salaId], references: [id])
+}
+
+model Appointment {
+  id        Int      @id @default(autoincrement())
+  date      DateTime
+  topic     String
+  zoomLink  String
+  status    String   @default("PENDING") // PENDING, COMPLETED, CANCELLED
+  createdAt DateTime @default(now())
+  
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], name: "UserAppointments")
+  
+  // En un sistema real, matronaId apuntaría a otra tabla o a un User con rol 'admin/matrona'
+  matronaName String   @default("Matrona Valentina")
+}
