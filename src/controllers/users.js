@@ -163,10 +163,34 @@ const searchUsers = async (req, res) => {
   }
 };
 
+const getSavedSalas = async (req, res) => {
+  try {
+    const savedSalas = await prisma.savedSala.findMany({
+      where: { userId: req.userId },
+      include: {
+        sala: true
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    
+    // Formatear igual que getSalas
+    const formattedSalas = savedSalas.map(s => ({
+      ...s.sala,
+      services: s.sala.services ? JSON.parse(s.sala.services) : []
+    }));
+
+    res.json(formattedSalas);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al obtener salas guardadas' });
+  }
+};
+
 module.exports = {
   updateProfile,
   getProfile,
   getPublicProfile,
   followUser,
-  searchUsers
+  searchUsers,
+  getSavedSalas
 };

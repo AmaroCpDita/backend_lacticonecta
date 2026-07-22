@@ -26,6 +26,7 @@ model User {
   reviews     Review[]
   postVotes   PostVote[]
   appointments Appointment[] @relation("UserAppointments")
+  savedSalas  SavedSala[]
   
   points      Int       @default(0)
   followers   User[]    @relation("UserFollows")
@@ -51,6 +52,7 @@ model Sala {
   updatedAt   DateTime @updatedAt
   
   salaReviews Review[]
+  savedBy     SavedSala[]
 }
 
 model Post {
@@ -121,3 +123,17 @@ model Appointment {
   // En un sistema real, matronaId apuntaría a otra tabla o a un User con rol 'admin/matrona'
   matronaName String   @default("Matrona Valentina")
 }
+
+model SavedSala {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  
+  salaId    Int
+  sala      Sala     @relation(fields: [salaId], references: [id])
+
+  @@unique([userId, salaId])
+}
+

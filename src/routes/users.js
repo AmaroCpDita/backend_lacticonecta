@@ -19,6 +19,7 @@ const upload = multer({ storage: storage });
 
 router.put('/profile', verifyToken, upload.single('avatar'), usersController.updateProfile);
 router.get('/profile', verifyToken, usersController.getProfile);
+router.get('/saved-salas', verifyToken, usersController.getSavedSalas);
 router.get('/search', verifyToken, usersController.searchUsers);
 router.get('/profile/:id', verifyToken, usersController.getPublicProfile);
 router.post('/:id/follow', verifyToken, usersController.followUser);

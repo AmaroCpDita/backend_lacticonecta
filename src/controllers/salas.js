@@ -100,7 +100,41 @@ const createReview = async (req, res) => {
     res.status(201).json(newReview);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Error al guardar la reseña' });
+    res.status(500).json({ error: 'Error al crear reseña' });
+  }
+};
+
+const saveSala = async (req, res) => {
+  try {
+    const salaId = parseInt(req.params.id);
+    const userId = req.userId;
+
+    await prisma.savedSala.create({
+      data: { userId, salaId }
+    });
+    res.json({ success: true, message: 'Sala guardada' });
+  } catch (error) {
+    // If it violates unique constraint, it's already saved, just ignore or return success
+    if (error.code === 'P2002') {
+      return res.json({ success: true, message: 'Sala ya estaba guardada' });
+    }
+    console.error(error);
+    res.status(500).json({ error: 'Error al guardar sala' });
+  }
+};
+
+const unsaveSala = async (req, res) => {
+  try {
+    const salaId = parseInt(req.params.id);
+    const userId = req.userId;
+
+    await prisma.savedSala.deleteMany({
+      where: { userId, salaId }
+    });
+    res.json({ success: true, message: 'Sala eliminada de guardados' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al eliminar sala guardada' });
   }
 };
 
@@ -108,5 +142,7 @@ module.exports = {
   getSalas,
   getSalaById,
   createSala,
-  createReview
+  createReview,
+  saveSala,
+  unsaveSala
 };
