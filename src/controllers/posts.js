@@ -3,7 +3,31 @@ const prisma = new PrismaClient();
 
 const getPosts = async (req, res) => {
   try {
+    const feed = req.query.feed || 'parati';
+    const userId = req.userId;
+
+    let whereClause = {};
+    let orderByClause = { createdAt: 'desc' };
+
+    if (feed === 'parati') {
+      orderByClause = { likes: 'desc' };
+    } else if (feed === 'recientes') {
+      orderByClause = { createdAt: 'desc' };
+    } else if (feed === 'siguiendo' && userId) {
+      // Get the user's following list
+      const me = await prisma.user.findUnique({
+        where: { id: userId },
+        include: { following: { select: { id: true } } }
+      });
+      const followingIds = me?.following?.map(u => u.id) || [];
+      if (followingIds.length === 0) {
+        return res.json({ posts: [], noFollowing: true });
+      }
+      whereClause = { authorId: { in: followingIds } };
+    }
+
     const posts = await prisma.post.findMany({
+      where: whereClause,
       include: {
         author: { select: { id: true, name: true, avatar: true, verified: true, points: true } },
         comments: {
@@ -14,9 +38,9 @@ const getPosts = async (req, res) => {
         },
         votes: true
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: orderByClause
     });
-    res.json(posts);
+    res.json(feed === 'siguiendo' ? { posts, noFollowing: false } : posts);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Error al obtener los posts' });

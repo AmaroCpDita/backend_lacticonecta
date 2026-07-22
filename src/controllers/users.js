@@ -37,6 +37,8 @@ const updateProfile = async (req, res) => {
 const getPublicProfile = async (req, res) => {
   try {
     const profileId = parseInt(req.params.id);
+    const myUserId = req.userId;
+    
     const profile = await prisma.user.findUnique({
       where: { id: profileId },
       select: {
@@ -60,7 +62,10 @@ const getPublicProfile = async (req, res) => {
       return res.status(404).json({ error: 'Perfil no encontrado' });
     }
 
-    res.json(profile);
+    // Check if the current user is following this profile
+    const isFollowing = myUserId ? profile.followers.some(f => f.id === myUserId) : false;
+
+    res.json({ ...profile, isFollowing });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Error al obtener perfil público' });
