@@ -50,7 +50,11 @@ const getPublicProfile = async (req, res) => {
         points: true,
         createdAt: true,
         posts: {
-          include: { author: { select: { id: true, name: true, avatar: true, verified: true, points: true } }, comments: true },
+          include: { 
+            author: { select: { id: true, name: true, avatar: true, verified: true, points: true } }, 
+            comments: true,
+            votes: true
+          },
           orderBy: { createdAt: 'desc' }
         },
         followers: { select: { id: true } },
@@ -138,6 +142,7 @@ const getProfile = async (req, res) => {
           select: { followers: true, following: true, posts: true }
         },
         posts: {
+          include: { votes: true, comments: true },
           orderBy: { createdAt: 'desc' }
         }
       }
@@ -154,20 +159,28 @@ const searchUsers = async (req, res) => {
     const { q } = req.query;
     if (!q) return res.json([]);
     
-    const users = await prisma.user.findMany({
-      where: {
-        name: { contains: q }
-      },
+    // Función para normalizar texto (quitar tildes y a minúsculas)
+    const normalizeText = (text) => 
+      text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+    const normalizedQuery = normalizeText(q);
+
+    // Obtener usuarios y filtrar en memoria para insensibilidad a tildes (solución simple para app pequeña)
+    const allUsers = await prisma.user.findMany({
       select: {
         id: true,
         name: true,
         avatar: true,
         verified: true,
         points: true
-      },
-      take: 10
+      }
     });
-    res.json(users);
+
+    const filteredUsers = allUsers
+      .filter(user => normalizeText(user.name).includes(normalizedQuery))
+      .slice(0, 10);
+
+    res.json(filteredUsers);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Error al buscar usuarios' });
