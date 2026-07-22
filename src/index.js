@@ -23,6 +23,7 @@ const postRoutes = require('./routes/posts');
 const salaRoutes = require('./routes/salas');
 const appointmentRoutes = require('./routes/appointments');
 const notificationsRoutes = require('./routes/notifications');
+const chatRoutes = require('./routes/chat');
 const path = require('path');
 
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
@@ -32,6 +33,7 @@ app.use('/api/posts', postRoutes);
 app.use('/api/salas', salaRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/notifications', notificationsRoutes);
+app.use('/api/chat', chatRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'LactiConecta API is running' });
