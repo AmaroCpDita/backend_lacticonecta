@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -44,6 +44,9 @@ model Sala {
   image       String?
   services    String   // JSON stringified array of services
   approved    Boolean  @default(false)
+  openTime    String?  // "08:00"
+  closeTime   String?  // "20:00"
+  openDays    String?  // "Lunes a Viernes"
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
