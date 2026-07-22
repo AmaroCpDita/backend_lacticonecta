@@ -10,8 +10,8 @@ const updateProfile = async (req, res) => {
     if (bio !== undefined) updateData.bio = bio;
     
     if (req.file) {
-      // Devolver una ruta relativa que funcione en cualquier entorno
-      const imageUrl = `/uploads/${req.file.filename}`;
+      const base64Data = req.file.buffer.toString('base64');
+      const imageUrl = `data:${req.file.mimetype};base64,${base64Data}`;
       updateData.avatar = imageUrl;
     }
 

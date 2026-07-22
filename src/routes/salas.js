@@ -1,7 +1,11 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
 const salasController = require('../controllers/salas');
 const { verifyToken } = require('../middlewares/auth');
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 router.get('/', salasController.getSalas);
 router.get('/:id', salasController.getSalaById);
