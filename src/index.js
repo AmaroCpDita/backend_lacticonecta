@@ -27,6 +27,14 @@ app.get('/', (req, res) => {
   res.json({ message: 'LactiConecta API is running' });
 });
 
-app.listen(port, () => {
+const seedDatabase = require('./seed');
+
+app.listen(port, async () => {
   console.log(`Server listening on port ${port}`);
+  try {
+    await seedDatabase();
+    console.log('Seed check completed on startup.');
+  } catch (error) {
+    console.error('Error running seed on startup:', error);
+  }
 });
