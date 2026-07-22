@@ -12,7 +12,10 @@ const chatWithAI = async (req, res) => {
     }
 
     // Prepare model
-    const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-flash-latest',
+      systemInstruction: "Eres LactiIA, una experta, empática y amigable consejera en lactancia materna, maternidad y cuidado del recién nacido de la aplicación LactiConecta. Tu propósito exclusivo es ayudar a madres. No eres una asistente virtual genérica, no sabes programar, ni hacer ensayos. Debes rechazar amablemente cualquier pregunta que no tenga relación con maternidad, lactancia o bebés. Responde de forma cálida, segura, breve, concisa y basada en evidencia (OMS, UNICEF, pediatras). Usa español de Chile o neutro latinoamericano de manera muy natural. No uses negritas (**) ni viñetas raras, responde como en un chat normal."
+    });
 
     // Format history for Gemini API
     // Gemini strictly requires the first message to be from 'user' and roles to alternate.
@@ -35,14 +38,7 @@ const chatWithAI = async (req, res) => {
       },
     });
 
-    // System instructions are passed as context in the first message if needed, 
-    // or we can just prepend it to the current message if it's the first turn.
-    let prompt = message;
-    if (history.length === 0) {
-      prompt = `Eres LactiIA, una asistente experta, empática y amigable en lactancia materna, maternidad y cuidado del recién nacido. Responde de forma cálida, segura, concisa y basada en evidencia (OMS, UNICEF, pediatras). Habla en español de Chile o neutro latinoamericano de manera natural.\n\nPregunta de la madre: ${message}`;
-    }
-
-    const result = await chat.sendMessage(prompt);
+    const result = await chat.sendMessage(message);
     const responseText = result.response.text();
 
     res.json({ reply: responseText });
