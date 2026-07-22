@@ -9,8 +9,8 @@ const updateProfile = async (req, res) => {
     if (name) updateData.name = name;
     
     if (req.file) {
-      // Si se subió un archivo, crear la URL de la imagen
-      const imageUrl = `http://localhost:3000/uploads/${req.file.filename}`;
+      // Devolver una ruta relativa que funcione en cualquier entorno
+      const imageUrl = `/uploads/${req.file.filename}`;
       updateData.avatar = imageUrl;
     }
 
