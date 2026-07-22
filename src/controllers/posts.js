@@ -175,10 +175,30 @@ const likeComment = async (req, res) => {
   }
 };
 
+const deletePost = async (req, res) => {
+  try {
+    const postId = parseInt(req.params.id);
+    const post = await prisma.post.findUnique({ where: { id: postId } });
+    
+    if (!post) return res.status(404).json({ error: 'Post no encontrado' });
+    
+    if (post.authorId !== req.userId) {
+      return res.status(403).json({ error: 'No tienes permiso para eliminar este post' });
+    }
+
+    await prisma.post.delete({ where: { id: postId } });
+    res.json({ message: 'Post eliminado exitosamente' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al eliminar el post' });
+  }
+};
+
 module.exports = {
   getPosts,
   createPost,
   votePost,
   addComment,
-  likeComment
+  likeComment,
+  deletePost
 };

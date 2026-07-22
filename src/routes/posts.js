@@ -8,5 +8,6 @@ router.post('/', verifyToken, postsController.createPost);
 router.post('/:id/vote', verifyToken, postsController.votePost);
 router.post('/:id/comments', verifyToken, postsController.addComment);
 router.post('/:id/comments/:commentId/like', verifyToken, postsController.likeComment);
+router.delete('/:id', verifyToken, postsController.deletePost);
 
 module.exports = router;
