@@ -24,6 +24,10 @@ model User {
   comments    Comment[]
   reviews     Review[]
   appointments Appointment[] @relation("UserAppointments")
+  
+  points      Int       @default(0)
+  followers   User[]    @relation("UserFollows")
+  following   User[]    @relation("UserFollows")
 }
 
 model Sala {
@@ -60,6 +64,7 @@ model Post {
 model Comment {
   id        Int      @id @default(autoincrement())
   content   String
+  likes     Int      @default(0)
   createdAt DateTime @default(now())
   
   authorId  Int
