@@ -110,12 +110,25 @@ const votePost = async (req, res) => {
       include: { author: true }
     });
 
-    // Gamification
+    // Gamification & Notification
     if (likesChange > 0) {
       await prisma.user.update({
         where: { id: updatedPost.authorId },
         data: { points: { increment: likesChange } }
       });
+      
+      // Notificación de Like
+      if (updatedPost.authorId !== userId) {
+        await prisma.notification.create({
+          data: {
+            type: 'like',
+            content: `le dio me gusta a tu publicación "${updatedPost.title}".`,
+            userId: updatedPost.authorId,
+            actorId: userId,
+            postId: postId
+          }
+        });
+      }
     } else if (likesChange < 0) {
       await prisma.user.update({
         where: { id: updatedPost.authorId },
@@ -142,9 +155,23 @@ const addComment = async (req, res) => {
         postId: postId
       },
       include: {
-        author: { select: { id: true, name: true, avatar: true, verified: true, points: true } }
+        author: { select: { id: true, name: true, avatar: true, verified: true, points: true } },
+        post: { select: { authorId: true, title: true } }
       }
     });
+
+    // Notificación de Comentario
+    if (newComment.post.authorId !== req.userId) {
+      await prisma.notification.create({
+        data: {
+          type: 'comment',
+          content: `comentó tu publicación "${newComment.post.title}".`,
+          userId: newComment.post.authorId,
+          actorId: req.userId,
+          postId: postId
+        }
+      });
+    }
 
     res.status(201).json(newComment);
   } catch (error) {

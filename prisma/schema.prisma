@@ -31,6 +31,9 @@ model User {
   points      Int       @default(0)
   followers   User[]    @relation("UserFollows")
   following   User[]    @relation("UserFollows")
+
+  notificationsReceived Notification[] @relation("UserNotifications")
+  notificationsSent     Notification[] @relation("NotificationActor")
 }
 
 model Sala {
@@ -53,6 +56,7 @@ model Sala {
   
   salaReviews Review[]
   savedBy     SavedSala[]
+  notifications Notification[]
 }
 
 model Post {
@@ -67,6 +71,7 @@ model Post {
   author    User     @relation(fields: [authorId], references: [id])
   comments  Comment[]
   votes     PostVote[]
+  notifications Notification[]
 }
 
 model PostVote {
@@ -120,7 +125,6 @@ model Appointment {
   userId    Int
   user      User     @relation(fields: [userId], references: [id], name: "UserAppointments")
   
-  // En un sistema real, matronaId apuntaría a otra tabla o a un User con rol 'admin/matrona'
   matronaName String   @default("Matrona Valentina")
 }
 
@@ -135,5 +139,25 @@ model SavedSala {
   sala      Sala     @relation(fields: [salaId], references: [id])
 
   @@unique([userId, salaId])
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  type      String   // 'like', 'comment', 'follow', 'system'
+  content   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  userId    Int
+  user      User     @relation("UserNotifications", fields: [userId], references: [id])
+
+  actorId   Int?
+  actor     User?    @relation("NotificationActor", fields: [actorId], references: [id])
+
+  postId    Int?
+  post      Post?    @relation(fields: [postId], references: [id])
+
+  salaId    Int?
+  sala      Sala?    @relation(fields: [salaId], references: [id])
 }
 

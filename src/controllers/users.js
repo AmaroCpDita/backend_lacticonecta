@@ -102,6 +102,17 @@ const followUser = async (req, res) => {
         where: { id: myUserId },
         data: { following: { connect: { id: targetUserId } } }
       });
+      
+      // Crear notificación
+      await prisma.notification.create({
+        data: {
+          type: 'follow',
+          content: 'comenzó a seguirte.',
+          userId: targetUserId,
+          actorId: myUserId
+        }
+      });
+
       res.json({ message: 'Ahora sigues a este usuario', following: true });
     }
   } catch (error) {

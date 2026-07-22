@@ -42,6 +42,20 @@ const getSalaById = async (req, res) => {
 const createSala = async (req, res) => {
   try {
     const { name, address, lat, lng, description, image, services } = req.body;
+    let userId = null;
+
+    // Obtener userId si existe el token (sin fallar si no existe)
+    const authHeader = req.headers['authorization'];
+    if (authHeader) {
+      const token = authHeader.split(' ')[1];
+      try {
+        const jwt = require('jsonwebtoken');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+        userId = decoded.id;
+      } catch (err) {
+        // Token inválido o expirado, se ignora
+      }
+    }
     
     const newSala = await prisma.sala.create({
       data: {
@@ -55,6 +69,17 @@ const createSala = async (req, res) => {
         approved: true // AUTO APROBADO PARA PRUEBAS
       }
     });
+
+    if (userId) {
+      await prisma.notification.create({
+        data: {
+          type: 'system',
+          content: '¡Felicidades! Tu sugerencia de sala ha sido aprobada y ahora es visible para todos.',
+          userId: userId,
+          salaId: newSala.id
+        }
+      });
+    }
     
     res.status(201).json(newSala);
   } catch (error) {
