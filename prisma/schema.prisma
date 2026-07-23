@@ -34,6 +34,7 @@ model User {
 
   notificationsReceived Notification[] @relation("UserNotifications")
   notificationsSent     Notification[] @relation("NotificationActor")
+  aiChats               AiChat[]
 }
 
 model Sala {
@@ -161,3 +162,25 @@ model Notification {
   sala      Sala?    @relation(fields: [salaId], references: [id])
 }
 
+model AiChat {
+  id        Int      @id @default(autoincrement())
+  title     String   @default("Nuevo Chat")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+
+  messages  AiMessage[]
+}
+
+model AiMessage {
+  id        Int      @id @default(autoincrement())
+  text      String
+  sender    String   // 'user' or 'ai'
+  emotion   String?  // 'NEUTRAL', 'EMPATIA', etc.
+  createdAt DateTime @default(now())
+
+  chatId    Int
+  chat      AiChat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
+}
