@@ -35,6 +35,8 @@ model User {
   notificationsReceived Notification[] @relation("UserNotifications")
   notificationsSent     Notification[] @relation("NotificationActor")
   aiChats               AiChat[]
+  commentVotes          CommentVote[]
+  reviewVotes           ReviewVote[]
 }
 
 model Sala {
@@ -100,11 +102,37 @@ model Comment {
   
   postId    Int
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  votes     CommentVote[]
+}
+
+model CommentVote {
+  id        Int      @id @default(autoincrement())
+  value     Int      // 1 or -1
+  createdAt DateTime @default(now())
+  
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  
+  commentId Int
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, commentId])
 }
 
 model Review {
   id        Int      @id @default(autoincrement())
   rating    Int
+  
+  // Detailed ratings (optional initially to not break existing)
+  cleanliness   Int?
+  privacy       Int?
+  comfort       Int?
+  equipment     Int?
+  accessibility Int?
+
+  helpfulCount  Int      @default(0)
+
   content   String?
   createdAt DateTime @default(now())
   
@@ -113,6 +141,22 @@ model Review {
   
   salaId    Int
   sala      Sala     @relation(fields: [salaId], references: [id])
+  
+  votes     ReviewVote[]
+}
+
+model ReviewVote {
+  id        Int      @id @default(autoincrement())
+  value     Int      // 1 (helpful) or -1 (not helpful)
+  createdAt DateTime @default(now())
+  
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  
+  reviewId  Int
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, reviewId])
 }
 
 model Appointment {

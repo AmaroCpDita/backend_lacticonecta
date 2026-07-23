@@ -7,7 +7,8 @@ router.get('/', verifyToken, postsController.getPosts);
 router.post('/', verifyToken, postsController.createPost);
 router.post('/:id/vote', verifyToken, postsController.votePost);
 router.post('/:id/comments', verifyToken, postsController.addComment);
-router.post('/:id/comments/:commentId/like', verifyToken, postsController.likeComment);
+router.post('/:id/comments/:commentId/vote', verifyToken, postsController.voteComment);
+router.delete('/:id/comments/:commentId', verifyToken, postsController.deleteComment);
 router.delete('/:id', verifyToken, postsController.deletePost);
 
 module.exports = router;
